@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 /** @brief The definition for the auxiliary script's location.
  * @details `QAPTIVA_AUXILIARY_SCRIPT_LOCATION` is an environment variable that
  * corresponse to location of the `qlm_auxiliary.py`. In this project, it should
- * be {PROJECT_SOURCE_DIR}/src/eviden/
+ * be {PROJECT_SOURCE_DIR}/src/bull/
  */
 #define SCRIPT_LOCATION "QAPTIVA_AUXILIARY_SCRIPT_LOCATION"
 

@@ -36,8 +36,8 @@ option(BUILD_DOCUMENTATION "Build the documentations" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# set(AVAILABLE_MODULES lrz eviden dcdb databases datacenters simulators)
-set(AVAILABLE_MODULES eviden)
+# set(AVAILABLE_MODULES lrz bull dcdb databases datacenters simulators)
+set(AVAILABLE_MODULES bull)
 # Main config variable for users
 set(BUILD_MODULES
     "all"
@@ -75,7 +75,7 @@ foreach(module ${AVAILABLE_MODULES})
     message(STATUS "Including module: ${module}")
     if(module STREQUAL "lrz")
       option(BUILD_BACKEND_LRZ "Build LRZ Backend" ON)
-    elseif(module STREQUAL "eviden")
+    elseif(module STREQUAL "bull")
       option(BUILD_BACKEND_EVIDEN "Build EVIDEN Backend" ON)
     elseif(module STREQUAL "dcdb")
       option(BUILD_BACKEND_DCDB "Build DCDB Backend" ON)

@@ -1,4 +1,4 @@
-# Copyright 2024 Munich Quantum Software Stack Project
+# Copyright 2026
 #
 # Licensed under the Apache License, Version 2.0 with LLVM Exceptions (the
 # "License"); you may not use this file except in compliance with the License.
@@ -14,10 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # ------------------------------------------------------------------------------
-add_subdirectory(compilers)
 
-add_subdirectory(databases)
-
-add_subdirectory(datacenters)
-
-add_subdirectory(simulators)
+if(BUILD_BACKEND_EVIDEN)
+  add_subdirectory(eviden)
+endif()

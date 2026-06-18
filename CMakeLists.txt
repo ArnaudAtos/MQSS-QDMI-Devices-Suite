@@ -36,7 +36,8 @@ option(BUILD_DOCUMENTATION "Build the documentations" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(AVAILABLE_MODULES lrz eviden dcdb databases datacenters simulators)
+# set(AVAILABLE_MODULES lrz eviden dcdb databases datacenters simulators)
+set(AVAILABLE_MODULES eviden)
 # Main config variable for users
 set(BUILD_MODULES
     "all"
@@ -110,6 +111,7 @@ endif()
 
 if(BUILD_BACKEND_EVIDEN)
   set(QAPTIVA_QDMI_PREFIX "QAPTIVA")
+  set(QAPTIVA_COMPILER_QDMI_PREFIX "QAPTIVA_COMPILER")
 endif()
 
 if(BUILD_BACKEND_DCDB)

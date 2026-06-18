@@ -1,4 +1,4 @@
-# Copyright 2024 Munich Quantum Software Stack Project
+# Copyright 2026
 #
 # Licensed under the Apache License, Version 2.0 with LLVM Exceptions (the
 # "License"); you may not use this file except in compliance with the License.
@@ -15,21 +15,31 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # ------------------------------------------------------------------------------
 
+# Find the pybind11 cmake package
+# This package should be installed using "pip install pybind11"
 # find_package(Python3 3.10...3.12 REQUIRED COMPONENTS Interpreter Development)
 find_package(Python3 3.12 REQUIRED COMPONENTS Interpreter Development)
 
-add_library(qaptiva_device SHARED qaptiva.c)
+execute_process(
+    COMMAND ${Python3_EXECUTABLE} -m pybind11 --cmakedir
+    OUTPUT_VARIABLE pybind11_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND_ERROR_IS_FATAL ANY
+)
+find_package(pybind11 REQUIRED)
 
-target_link_libraries(qaptiva_device PUBLIC qdmi::qdmi qdmi::project_warnings
-                                            ${Python3_LIBRARIES})
-generate_prefixed_qdmi_headers(${QAPTIVA_QDMI_PREFIX})
+add_library(qaptiva_compiler_device SHARED qaptiva_compiler.cpp)
+
+target_link_libraries(qaptiva_compiler_device PUBLIC qdmi::qdmi qdmi::project_warnings pybind11::embed)
+
+generate_prefixed_qdmi_headers(${QAPTIVA_COMPILER_QDMI_PREFIX})
 target_include_directories(
-  qaptiva_device PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include
-                        ${Python3_INCLUDE_DIRS})
-add_library(qdmi::qaptiva_device ALIAS qaptiva_device)
+  qaptiva_compiler_device PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include ${Python3_INCLUDE_DIRS}
+)
+
+add_library(qdmi::qaptiva_compiler_device ALIAS qaptiva_compiler_device)
 
 if(ENABLE_COVERAGE)
-  target_compile_options(qaptiva_device INTERFACE --coverage -fprofile-arcs
-                                                  -ftest-coverage -O0)
-  target_link_libraries(qaptiva_device INTERFACE gcov --coverage)
+  target_compile_options(qaptiva_compiler_device INTERFACE --coverage -fprogile-arcs -ftest-coverage -O0)
+  target_link_libraries(tqaptiva_compiler_device INTERFACE gcov --coverage)
 endif()

@@ -1,4 +1,4 @@
-# Copyright 2024 Munich Quantum Software Stack Project
+# Copyright 2026
 #
 # Licensed under the Apache License, Version 2.0 with LLVM Exceptions (the
 # "License"); you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # ------------------------------------------------------------------------------
-add_subdirectory(compilers)
 
-add_subdirectory(databases)
+enable_testing()
+include(GoogleTest)
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_subdirectory(datacenters)
-
-add_subdirectory(simulators)
+generate_device_defs_executable(${QAPTIVA_COMPILER_QDMI_PREFIX})

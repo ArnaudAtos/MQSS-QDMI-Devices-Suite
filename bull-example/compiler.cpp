@@ -40,8 +40,11 @@ int main() {
 
     // Print everything
     std::cout << "Compiling a Bell pair circuit using 'NISQCompiler(target_gate_set=\"" << target_gate_set << "\")'\n"
+              << "\n"
               << "The generated OpenQASM 2 circuit is:\n"
-              << output << std::endl;
+              << "\"\"\"\n"
+              << output
+              << "\"\"\"" << std::endl;
 
     // Clean-up
     QAPTIVA_COMPILER_QDMI_device_job_free(job);

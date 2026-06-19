@@ -383,14 +383,48 @@ int QAPTIVA_COMPILER_QDMI_device_job_wait(QAPTIVA_COMPILER_QDMI_Device_Job job, 
 
 
 int QAPTIVA_COMPILER_QDMI_device_job_get_results(
-    QAPTIVA_COMPILER_QDMI_Device_Job /* job */,
-    QDMI_Job_Result /* result */,
-    size_t /* size */,
-    void * /* data */,
-    size_t * /* size_ret */
+    QAPTIVA_COMPILER_QDMI_Device_Job job,
+    QDMI_Job_Result result_type,
+    size_t size,
+    void * data,
+    size_t * size_ret
 ) {
-    // TODO
-    return QDMI_ERROR_FATAL;
+    if (result_type != QDMI_JOB_RESULT_CUSTOM1)
+        return QDMI_ERROR_NOTSUPPORTED;
+
+    auto locals = pybind11::dict("job_id"_a=job->job_id);
+
+    try {
+        pybind11::exec(R"(
+            from qlmaas.utils import get_job
+
+            qaptiva_to_oqasm = {
+                "H": "h", "X": "x", "Y": "y", "Z": "z",
+                "RX": "rx", "RY": "ry", "RZ": "rz", "PH": "ph",
+                "CNOT": "cx", "CSIGN": "cz",
+            }
+            compiled_circuit = get_job(job_id).get_result().circuit
+            oqasm_lines = ["OPENQASM 2.0;", f"qreg q[{circuit.nbqbits}];"]
+
+            for gate, params, qbits in compiled_circuit.iterate_simple():
+                oqasm_gate = qaptiva_to_oqasm[gate]
+
+                if params:
+                    oqasm_gate += "[" + ",".join(str(angle) for angle in params) + "]"
+
+                oqasm_lines.append(oqasm_gate + " " + ",".join(f"q[{i}]" for i in qbits) + ";")
+
+            oqasm_output = "\n".join(oqasm_lines)
+        )", pybind11::globals(), locals);
+    } catch(pybind11::error_already_set &) {
+        return QDMI_ERROR_FATAL;
+    }
+
+    auto result_str = locals["oqasm_output"].cast<std::string>();
+    std::memcpy(data, result_str.data(), result_str.size());
+    *size_ret = result_str.size();
+
+    return QDMI_SUCCESS;
 }
 
 

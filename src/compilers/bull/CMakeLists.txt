@@ -18,7 +18,7 @@
 # Find the pybind11 cmake package
 # This package should be installed using "pip install pybind11"
 # find_package(Python3 3.10...3.12 REQUIRED COMPONENTS Interpreter Development)
-find_package(Python3 3.12 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 3.14 REQUIRED COMPONENTS Interpreter Development)
 
 execute_process(
     COMMAND ${Python3_EXECUTABLE} -m pybind11 --cmakedir

@@ -16,7 +16,7 @@
 # ------------------------------------------------------------------------------
 
 # find_package(Python3 3.10...3.12 REQUIRED COMPONENTS Interpreter Development)
-find_package(Python3 3.12 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 3.14 REQUIRED COMPONENTS Interpreter Development)
 
 add_library(qaptiva_device SHARED qaptiva.c)
 

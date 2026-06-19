@@ -14,7 +14,7 @@ int main() {
         h q[0];
         cx q[0],q[1];
     )";
-    std::string target_gate_set = "QUOBLY";
+    std::string target_gate_set = "IONS";
 
     // Initialize device
     QAPTIVA_COMPILER_QDMI_device_initialize();

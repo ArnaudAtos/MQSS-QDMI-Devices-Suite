@@ -400,11 +400,11 @@ int QAPTIVA_COMPILER_QDMI_device_job_get_results(
 
             qaptiva_to_oqasm = {
                 "H": "h", "X": "x", "Y": "y", "Z": "z",
-                "RX": "rx", "RY": "ry", "RZ": "rz", "PH": "ph",
+                "RX": "rx", "RY": "ry", "RZ": "rz", "PH": "ph", "K": "k",
                 "CNOT": "cx", "CSIGN": "cz",
             }
             compiled_circuit = get_job(job_id).get_result().circuit
-            oqasm_lines = ["OPENQASM 2.0;", f"qreg q[{circuit.nbqbits}];"]
+            oqasm_lines = ["OPENQASM 2.0;", f"qreg q[{compiled_circuit.nbqbits}];", ""]
 
             for gate, params, qbits in compiled_circuit.iterate_simple():
                 oqasm_gate = qaptiva_to_oqasm[gate]

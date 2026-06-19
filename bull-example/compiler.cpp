@@ -37,7 +37,11 @@ int main() {
     size_t output_size;
     QAPTIVA_COMPILER_QDMI_device_job_get_results(job, QDMI_JOB_RESULT_CUSTOM1, buffer.size(), buffer.data(), &output_size);
     std::string output { buffer.data(), output_size };
-    std::cout << output << std::endl;
+
+    // Print everything
+    std::cout << "Compiling a Bell pair circuit using 'NISQCompiler(target_gate_set=\"" << target_gate_set << "\")'\n"
+              << "The generated OpenQASM 2 circuit is:\n"
+              << output << std::endl;
 
     // Clean-up
     QAPTIVA_COMPILER_QDMI_device_job_free(job);

@@ -68,7 +68,7 @@ int QAPTIVA_COMPILER_QDMI_device_initialize() {
         global_python_interpreter = std::make_unique<pybind11::scoped_interpreter>();
     }
 
-    pybind11::handle qaptiva_access_connection;
+    pybind11::object qaptiva_access_connection;
 
     // Try to create a connection
     // If an exception is raised here, the Qaptiva Access connection is not properly configured so "QDMI_ERROR_FATAL"
@@ -83,7 +83,7 @@ int QAPTIVA_COMPILER_QDMI_device_initialize() {
     // Checks if the NISQCompiler is available on the server side
     // If the compiler is not available on the server side, "QDMI_ERROR_NOTFOUND" will be returned
     try {
-        qaptiva_access_connection.attr("get_plugin")("qat.plugin:NISQCompiler");
+        qaptiva_access_connection.attr("get_plugin")("qat.plugins:NISQCompiler");
     } catch(pybind11::error_already_set &) {
         global_python_interpreter = nullptr;
         return QDMI_ERROR_NOTFOUND;
@@ -288,8 +288,8 @@ int QAPTIVA_COMPILER_QDMI_device_job_submit(QAPTIVA_COMPILER_QDMI_Device_Job job
             compiler = NISQCompiler(target_gate_set=target_gate_set)
             object_to_be_compiled = circuit.to_job()
 
-            submitted_job = compiler.submit(object_to_be_compiled, None)
-            job_id = submitted_job.jod_id
+            submitted_job = compiler.compile(object_to_be_compiled, None)
+            job_id = submitted_job.job_id
         )", pybind11::globals(), locals);
     } catch (pybind11::error_already_set &) {
         return QDMI_ERROR_FATAL;

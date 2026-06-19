@@ -7,9 +7,9 @@
 
 int main() {
     std::string input_bell = R"(
-        OPENQASM 2;
+        OPENQASM 2.0;
 
-       qreg q[2];
+        qreg q[2];
 
         h q[0];
         cx q[0],q[1];

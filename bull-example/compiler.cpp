@@ -43,7 +43,7 @@ int main() {
               << "\n"
               << "The generated OpenQASM 2 circuit is:\n"
               << "\"\"\"\n"
-              << output
+              << output << "\n"
               << "\"\"\"" << std::endl;
 
     // Clean-up

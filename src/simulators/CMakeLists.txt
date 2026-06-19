@@ -15,6 +15,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # ------------------------------------------------------------------------------
 
-if(BUILD_BACKEND_EVIDEN)
+if(BUILD_BACKEND_BULL)
   add_subdirectory(bull)
 endif()

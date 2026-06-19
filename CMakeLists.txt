@@ -76,7 +76,7 @@ foreach(module ${AVAILABLE_MODULES})
     if(module STREQUAL "lrz")
       option(BUILD_BACKEND_LRZ "Build LRZ Backend" ON)
     elseif(module STREQUAL "bull")
-      option(BUILD_BACKEND_EVIDEN "Build EVIDEN Backend" ON)
+      option(BUILD_BACKEND_BULL "Build BULL Backend" ON)
     elseif(module STREQUAL "dcdb")
       option(BUILD_BACKEND_DCDB "Build DCDB Backend" ON)
     elseif(module STREQUAL "simulators")
@@ -104,12 +104,12 @@ if(BUILD_DATABASES)
 endif()
 
 if(BUILD_SIMULATOR)
-  set(BUILD_BACKEND_EVIDEN
+  set(BUILD_BACKEND_BULL
       ON
       CACHE BOOL "" FORCE)
 endif()
 
-if(BUILD_BACKEND_EVIDEN)
+if(BUILD_BACKEND_BULL)
   set(QAPTIVA_QDMI_PREFIX "QAPTIVA")
   set(QAPTIVA_COMPILER_QDMI_PREFIX "QAPTIVA_COMPILER")
 endif()
@@ -145,4 +145,9 @@ endif()
 
 if(BUILD_DOCUMENTATION)
   add_subdirectory(docs)
+endif()
+
+# TO be removed
+if(BUILD_BACKEND_BULL)
+  add_subdirectory(bull-example)
 endif()

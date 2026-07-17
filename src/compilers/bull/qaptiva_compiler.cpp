@@ -47,7 +47,7 @@ namespace {
             oqasm_output = "\n".join(oqasm_lines)
         )", pybind11::globals(), locals);
 
-        return locals["oqasm_output"].cast<std::string>()
+        return locals["oqasm_output"].cast<std::string>();
     }
 
 
@@ -462,7 +462,7 @@ int QAPTIVA_COMPILER_QDMI_device_job_get_results(
             result_str = qaptiva_get_result_as_openqasm(job->job_id);
         }
         else if (result_type == QDMI_JOB_RESULT_CUSTOM2) {
-            return_str = qaptiva_get_result_as_shuttling_schedule(job->job_id);
+            result_str = qaptiva_get_result_as_shuttling_schedule(job->job_id);
         }
         else {
             return QDMI_ERROR_NOTSUPPORTED;

@@ -4,9 +4,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 
-#define _STRINGIFY(txt) #txt
-#define STRINGIFY(txt) _STRINGIFY(txt)
-
 using namespace pybind11::literals;
 
 
@@ -67,10 +64,51 @@ namespace {
         auto locals = pybind11::dict("job_id"_a=job_id);
 
         // Can throw a pybind11::error_already_set
-        pybind11::exec(STRINGIFY(#include "trapped_ions_scheduler.py"), pybind11::globals(), locals);
-
         pybind11::exec(R"(
             from qlmaas.utils import get_job
+            from qat.core import Circuit
+
+
+            def _qubit_placement_to_str(qubit_placement):
+                " Stringify qubit placement "
+                return "{" + ", ".join(f"{val}: q{idx}" for idx, val in enumerate(qubit_placement)) + "}"
+
+
+            def generate_schedule_from_circuit(circuit: Circuit):
+                """
+                Generates a execution schedule for trapped-ions devices given an input circuit.
+
+                Args:
+                    circuit (Circuit): the circuit to generate a schedule
+
+                Returns:
+                    str: the schedule of the circuit for trapped-ions devices
+                """
+                nbqbits = circuit.nbqbits
+                start_index = -1 * nbqbits
+                qubit_placement = list(range(start_index, start_index + nbqbits))
+                schedule_lines = [_qubit_placement_to_str(qubit_placement)]
+                for gate, params, qbits in circuit.iterate_simple():
+                    if len(qbits) == 1:
+                        if qubit_placement[qbits[0]] != 0:
+                            # Shuttling is needed since the qubit is not already at the LIZ
+                            schedule_lines.append("SHUTTLE")
+                            start_index = -1 * qbits[0]
+                            qubit_placement = list(range(start_index, start_index + nbqbits))
+                            schedule_lines.append(_qubit_placement_to_str(qubit_placement))
+                        schedule_lines.append(f"APPLY {gate} " + ",".join(str(angle) for angle in params))
+                    else:
+                        # Two qubits gate
+                        first_qubit, second_qubit = sorted(qbits)
+                        if not (qubit_placement[first_qubit] == -1 and qubit_placement[second_qubit] == 1):
+                            schedule_lines.append("SHUTTLE")
+                            qubit_placement = [(i - first_qubit - 1) if i <= first_qubit else (i - second_qubit + 1) for i in range(nbqbits)]
+                            schedule_lines.append(_qubit_placement_to_str(qubit_placement))
+                        schedule_lines.append("MERGE")
+                        schedule_lines.append(f"APPLY {gate} " + ",".join(str(angle) for angle in params))
+                        schedule_lines.append("SPLIT")
+                schedule_output = "\n".join(schedule_lines)
+                return schedule_output
 
             compiled_circuit = get_job(job_id).get_result().circuit
             result = generate_schedule_from_circuit(compiled_circuit)

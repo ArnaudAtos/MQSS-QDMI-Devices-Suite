@@ -10,6 +10,69 @@ using namespace pybind11::literals;
 namespace {
     /// Pointer to the global python interpreter
     std::unique_ptr<pybind11::scoped_interpreter> global_python_interpreter = nullptr;
+
+
+    /**
+     * Function returning the result of a Qaptiva Access compilation job
+     * as an OpenQASM 2.0 string
+     *
+     * This function can throw a pybind11::error_already_set exception
+     *
+     * @param job_id Qaptiva Access job ID
+     * @return OpenQASM 2.0 string
+     */
+    std::string qaptiva_get_result_as_openqasm(const std::string & job_id) {
+        auto locals = pybind11::dict("job_id"_a=job_id);
+
+        // Can throw a pybind11::error_already_set
+        pybind11::exec(R"(
+            from qlmaas.utils import get_job
+
+            qaptiva_to_oqasm = {
+                "H": "h", "X": "x", "Y": "y", "Z": "z",
+                "RX": "rx", "RY": "ry", "RZ": "rz", "PH": "ph", "K": "k",
+                "CNOT": "cx", "CSIGN": "cz",
+            }
+            compiled_circuit = get_job(job_id).get_result().circuit
+            oqasm_lines = ["OPENQASM 2.0;", f"qreg q[{compiled_circuit.nbqbits}];", ""]
+
+            for gate, params, qbits in compiled_circuit.iterate_simple():
+                oqasm_gate = qaptiva_to_oqasm[gate]
+
+                if params:
+                    oqasm_gate += "[" + ",".join(str(angle) for angle in params) + "]"
+
+                oqasm_lines.append(oqasm_gate + " " + ",".join(f"q[{i}]" for i in qbits) + ";")
+
+            oqasm_output = "\n".join(oqasm_lines)
+        )", pybind11::globals(), locals);
+
+        return locals["oqasm_output"].cast<std::string>()
+    }
+
+
+    /**
+     * Function returning the resul of a Qaptiva Access compilation job
+     * as a shuttling schedule string
+     *
+     * This function can throw a pybind11::error_already_set exception
+     *
+     * @param job_id Qaptiva Access job ID
+     * @return Shuttling Schedule string
+     */
+    std::string qaptiva_get_result_as_shuttling_schedule(const std::string & job_id) {
+        auto locals = pybind11::dict("job_id"_a=job_id);
+
+        // Can throw a pybind11::error_already_set
+        pybind11::exec(R"(
+            from qlmaas.utils import get_job
+
+            compiled_circuit = get_job(job_id).get_result().circuit
+            result = ""
+        )");
+
+        return locals["result"].cast<std::string>();
+    }
 }
 
 
@@ -391,38 +454,23 @@ int QAPTIVA_COMPILER_QDMI_device_job_get_results(
     void * data,
     size_t * size_ret
 ) {
-    if (result_type != QDMI_JOB_RESULT_CUSTOM1)
-        return QDMI_ERROR_NOTSUPPORTED;
-
-    auto locals = pybind11::dict("job_id"_a=job->job_id);
+    // Initialize the result string
+    std::string result_str;
 
     try {
-        pybind11::exec(R"(
-            from qlmaas.utils import get_job
-
-            qaptiva_to_oqasm = {
-                "H": "h", "X": "x", "Y": "y", "Z": "z",
-                "RX": "rx", "RY": "ry", "RZ": "rz", "PH": "ph", "K": "k",
-                "CNOT": "cx", "CSIGN": "cz",
-            }
-            compiled_circuit = get_job(job_id).get_result().circuit
-            oqasm_lines = ["OPENQASM 2.0;", f"qreg q[{compiled_circuit.nbqbits}];", ""]
-
-            for gate, params, qbits in compiled_circuit.iterate_simple():
-                oqasm_gate = qaptiva_to_oqasm[gate]
-
-                if params:
-                    oqasm_gate += "[" + ",".join(str(angle) for angle in params) + "]"
-
-                oqasm_lines.append(oqasm_gate + " " + ",".join(f"q[{i}]" for i in qbits) + ";")
-
-            oqasm_output = "\n".join(oqasm_lines)
-        )", pybind11::globals(), locals);
-    } catch(pybind11::error_already_set &) {
+        if (result_type == QDMI_JOB_RESULT_CUSTOM1) {
+            result_str = qaptiva_get_result_as_openqasm(job->job_id);
+        }
+        else if (result_type == QDMI_JOB_RESULT_CUSTOM2) {
+            return_str = qaptiva_get_result_as_shuttling_schedule(job->job_id);
+        }
+        else {
+            return QDMI_ERROR_NOTSUPPORTED;
+        }
+    } catch (pybind11::error_already_set &) {
         return QDMI_ERROR_FATAL;
     }
 
-    auto result_str = locals["oqasm_output"].cast<std::string>();
     std::memcpy(data, result_str.data(), result_str.size());
     *size_ret = result_str.size();
 

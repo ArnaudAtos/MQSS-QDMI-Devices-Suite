@@ -6,13 +6,14 @@
 
 
 int main() {
-    std::string input_bell = R"(
+    std::string input_prog = R"(
         OPENQASM 2.0;
 
         qreg q[2];
 
-        h q[0];
+        ry(0.36574) q[0];
         cx q[0],q[1];
+        ry(0.36574) q[1];
     )";
     std::string target_gate_set = "IONS";
 
@@ -27,14 +28,14 @@ int main() {
     // Initialize job
     QAPTIVA_COMPILER_QDMI_Device_Job job;
     QAPTIVA_COMPILER_QDMI_device_session_create_device_job(session, &job);
-    QAPTIVA_COMPILER_QDMI_device_job_set_parameter(job, QDMI_DEVICE_JOB_PARAMETER_PROGRAM, input_bell.size(), input_bell.c_str());
+    QAPTIVA_COMPILER_QDMI_device_job_set_parameter(job, QDMI_DEVICE_JOB_PARAMETER_PROGRAM, input_prog.size(), input_prog.c_str());
     QAPTIVA_COMPILER_QDMI_device_job_set_parameter(job, QDMI_DEVICE_JOB_PARAMETER_CUSTOM1, target_gate_set.size(), target_gate_set.c_str());
 
     QAPTIVA_COMPILER_QDMI_device_job_submit(job);
     QAPTIVA_COMPILER_QDMI_device_job_wait(job, 0UL);
 
-    std::array<char, 1024UL> buffer;
-    size_t output_size;
+    std::array<char, 4096UL> buffer;
+    size_t output_size = 0UL;
 
     QAPTIVA_COMPILER_QDMI_device_job_get_results(job, QDMI_JOB_RESULT_CUSTOM1, buffer.size(), buffer.data(), &output_size);
     std::string output_oqasm { buffer.data(), output_size };
@@ -43,7 +44,7 @@ int main() {
     std::string output_shuttling_schedule { buffer.data(), output_size };
 
     // Print everything
-    std::cout << "Compiling a Bell pair circuit using 'NISQCompiler(target_gate_set=\"" << target_gate_set << "\")'\n"
+    std::cout << "Compiling a circuit using 'NISQCompiler(target_gate_set=\"" << target_gate_set << "\")'\n"
               << "\n"
               << "The generated OpenQASM 2 circuit is:\n"
               << "\"\"\"\n"

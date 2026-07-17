@@ -25,13 +25,13 @@ namespace {
         auto locals = pybind11::dict("job_id"_a=job_id);
 
         // Can throw a pybind11::error_already_set
-        pybind11::exec(R"(
+        pybind11::exec(R"code(
             from qlmaas.utils import get_job
 
             qaptiva_to_oqasm = {
                 "H": "h", "X": "x", "Y": "y", "Z": "z",
                 "RX": "rx", "RY": "ry", "RZ": "rz", "PH": "ph", "K": "k",
-                "CNOT": "cx", "CSIGN": "cz",
+                "CNOT": "cx", "CSIGN": "cz", "XX": "rxx(π/2)"
             }
             compiled_circuit = get_job(job_id).get_result().circuit
             oqasm_lines = ["OPENQASM 2.0;", f"qreg q[{compiled_circuit.nbqbits}];", ""]
@@ -45,7 +45,7 @@ namespace {
                 oqasm_lines.append(oqasm_gate + " " + ",".join(f"q[{i}]" for i in qbits) + ";")
 
             oqasm_output = "\n".join(oqasm_lines)
-        )", pybind11::globals(), locals);
+        )code", pybind11::globals(), locals);
 
         return locals["oqasm_output"].cast<std::string>();
     }
@@ -69,11 +69,6 @@ namespace {
             from qat.core import Circuit
 
 
-            def _qubit_placement_to_str(qubit_placement):
-                " Stringify qubit placement "
-                return "{" + ", ".join(f"{val}: q{idx}" for idx, val in enumerate(qubit_placement)) + "}"
-
-
             def generate_schedule_from_circuit(circuit: Circuit):
                 """
                 Generates a execution schedule for trapped-ions devices given an input circuit.
@@ -84,6 +79,10 @@ namespace {
                 Returns:
                     str: the schedule of the circuit for trapped-ions devices
                 """
+                def _qubit_placement_to_str(qubit_placement):
+                    " Stringify qubit placement "
+                    return "{" + ", ".join(f"{val}: q{idx}" for idx, val in enumerate(qubit_placement)) + "}"
+
                 nbqbits = circuit.nbqbits
                 start_index = -1 * nbqbits
                 qubit_placement = list(range(start_index, start_index + nbqbits))

@@ -35,15 +35,24 @@ int main() {
 
     std::array<char, 1024UL> buffer;
     size_t output_size;
+
     QAPTIVA_COMPILER_QDMI_device_job_get_results(job, QDMI_JOB_RESULT_CUSTOM1, buffer.size(), buffer.data(), &output_size);
-    std::string output { buffer.data(), output_size };
+    std::string output_oqasm { buffer.data(), output_size };
+
+    QAPTIVA_COMPILER_QDMI_device_job_get_results(job, QDMI_JOB_RESULT_CUSTOM2, buffer.size(), buffer.data(), &output_size);
+    std::string output_shuttling_schedule { buffer.data(), output_size };
 
     // Print everything
     std::cout << "Compiling a Bell pair circuit using 'NISQCompiler(target_gate_set=\"" << target_gate_set << "\")'\n"
               << "\n"
               << "The generated OpenQASM 2 circuit is:\n"
               << "\"\"\"\n"
-              << output << "\n"
+              << output_oqasm << "\n"
+              << "\"\"\"\n"
+              << "\n"
+              << "The corresponding shuttling schedule is: \n"
+              << "\"\"\"\n"
+              << output_shuttling_schedule << "\n"
               << "\"\"\"" << std::endl;
 
     // Clean-up

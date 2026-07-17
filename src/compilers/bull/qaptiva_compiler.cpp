@@ -69,7 +69,7 @@ namespace {
 
             compiled_circuit = get_job(job_id).get_result().circuit
             result = ""
-        )");
+        )", pybind11::globals(), locals);
 
         return locals["result"].cast<std::string>();
     }

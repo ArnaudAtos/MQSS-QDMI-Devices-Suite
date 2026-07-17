@@ -282,13 +282,15 @@ int QAPTIVA_COMPILER_QDMI_device_job_submit(QAPTIVA_COMPILER_QDMI_Device_Job job
     try {
         pybind11::exec(R"(
             from qlmaas.plugins import NISQCompiler
+            from qat.devices import LineDevice
             from qat.interop.openqasm import OqasmParser
 
             circuit = OqasmParser().compile(program_content)
             compiler = NISQCompiler(target_gate_set=target_gate_set)
             object_to_be_compiled = circuit.to_job()
 
-            submitted_job = compiler.compile(object_to_be_compiled, None)
+            line_device = LineDevice(circuit.nbqbits)
+            submitted_job = compiler.compile(object_to_be_compiled, line_device)
             job_id = submitted_job.job_id
         )", pybind11::globals(), locals);
     } catch (pybind11::error_already_set &) {

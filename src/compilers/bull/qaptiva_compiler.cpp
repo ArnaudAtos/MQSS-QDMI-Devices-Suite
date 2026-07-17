@@ -4,6 +4,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 
+#define _STRINGIFY(txt) #txt
+#define STRINGIFY(txt) _STRINGIFY(txt)
+
 using namespace pybind11::literals;
 
 
@@ -64,11 +67,13 @@ namespace {
         auto locals = pybind11::dict("job_id"_a=job_id);
 
         // Can throw a pybind11::error_already_set
+        pybind11::exec(STRINGIFY(#include "trapped_ions_scheduler.py"), pybind11::globals(), locals);
+
         pybind11::exec(R"(
             from qlmaas.utils import get_job
 
             compiled_circuit = get_job(job_id).get_result().circuit
-            result = ""
+            result = generate_schedule_from_circuit(compiled_circuit)
         )", pybind11::globals(), locals);
 
         return locals["result"].cast<std::string>();

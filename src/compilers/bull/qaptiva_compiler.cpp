@@ -1,6 +1,7 @@
 #include "qaptiva_compiler_qdmi/device.h"
 
 #include <string>
+#include <algorithm>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 
@@ -513,8 +514,8 @@ int QAPTIVA_COMPILER_QDMI_device_job_get_results(
         return QDMI_ERROR_FATAL;
     }
 
-    std::memcpy(data, result_str.data(), result_str.size());
-    *size_ret = result_str.size();
+    std::memcpy(data, result_str.data(), std::min(result_str.size(), size));
+    *size_ret = std::min(result_str.size(), size);
 
     return QDMI_SUCCESS;
 }
